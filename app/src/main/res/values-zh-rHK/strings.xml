@@ -589,6 +589,7 @@
     <string name="enable_volume_bar_percent_display">启用音量条百分比显示</string>
     <string name="custom_volume_bar_percent_color">自定义音量条百分比颜色</string>
     <string name="disable_accessibility_warning_dialog">禁用无障碍警告对话框</string>
+    <string name="disable_audio_focus">禁用音频焦点</string>
     <string name="remove_virus_risk_notification_in_phone_manager">移除手机管家发现病毒风险通知</string>
     <string name="remove_secure_pay_found_virus_dialog">移除支付保护发现病毒对话框</string>
     <string name="remove_countdown_add_virus_app_whitelist">移除添加病毒应用白名单的倒计时</string>

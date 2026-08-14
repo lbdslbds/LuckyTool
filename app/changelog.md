@@ -16,6 +16,7 @@ in [TG Channel’s associated groups](https://t.me/LuckyTool)**
 - [适配] 移除控制中心时钟组件 C16.1(400)
 - [添加] 解锁GpsJoyStick Pro
 - [添加] 移除控制中心设置按钮 C16.1
+- [添加] 禁用音频焦点
 
 [//]: # (- [添加] 自定义音乐歌词显示白名单)
 

@@ -151,6 +151,13 @@ class SoundRelated : BaseScopePreferenceFeagment() {
                     }
                 })
             }
+            add(SwitchPreference(this@loadPreferences).apply {
+                title = getString(R.string.disable_audio_focus)
+                key = "disable_audio_focus"
+                summary = getString(R.string.need_restart_system)
+                setDefaultValue(false)
+                isIconSpaceReserved = false
+            })
         }
     }
 }

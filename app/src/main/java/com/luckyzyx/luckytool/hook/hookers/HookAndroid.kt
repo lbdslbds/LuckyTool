@@ -11,6 +11,7 @@ import com.luckyzyx.luckytool.hook.scopes.android.AppSplashScreen
 import com.luckyzyx.luckytool.hook.scopes.android.BatteryOptimizationWhitelist
 import com.luckyzyx.luckytool.hook.scopes.android.DarkModeService
 import com.luckyzyx.luckytool.hook.scopes.android.DisableAccessibilityWarningDialog
+import com.luckyzyx.luckytool.hook.scopes.android.DisableAudioFocus
 import com.luckyzyx.luckytool.hook.scopes.android.DisableMaliciousAppIntercept
 import com.luckyzyx.luckytool.hook.scopes.android.EnableKeepNotificationWhenAppStop
 import com.luckyzyx.luckytool.hook.scopes.android.EnableVideoMemcFrameInsertion
@@ -150,6 +151,11 @@ object HookAndroid : YukiBaseHooker() {
         //禁用无障碍警告对话框
         if (prefs(ModulePrefs).getBoolean("disable_accessibility_warning_dialog", false)) {
             if (osCode >= 38) loadHooker(DisableAccessibilityWarningDialog)
+        }
+
+        //禁用音频焦点
+        if (prefs(ModulePrefs).getBoolean("disable_audio_focus", false)) {
+            loadHooker(DisableAudioFocus)
         }
 
         //Source OplusMediaControlService

@@ -667,6 +667,7 @@
     <string name="enable_volume_bar_percent_display">Enable volume bar percentage display</string>
     <string name="custom_volume_bar_percent_color">Customize volume bar percentage color</string>
     <string name="disable_accessibility_warning_dialog">Disable accessibility warning dialog</string>
+    <string name="disable_audio_focus">Disable audio focus</string>
     
     <!--PhoneManager-->
     <string name="remove_virus_risk_notification_in_phone_manager">Remove the virus risk notification in Phone Manager</string>
