@@ -53,12 +53,10 @@ jobs:
           if [ -n "$KEYSTORE_BASE64" ]; then
             echo "Using keystore from GitHub Secrets..."
             echo "$KEYSTORE_BASE64" | base64 -d > keystore/release.jks
-            cat <<EOF > keystore/keystore.properties
-storeFile=../keystore/release.jks
-storePassword=$KEYSTORE_PASSWORD
-keyAlias=$KEY_ALIAS
-keyPassword=$KEY_PASSWORD
-EOF
+            echo "storeFile=../keystore/release.jks" > keystore/keystore.properties
+            echo "storePassword=$KEYSTORE_PASSWORD" >> keystore/keystore.properties
+            echo "keyAlias=$KEY_ALIAS" >> keystore/keystore.properties
+            echo "keyPassword=$KEY_PASSWORD" >> keystore/keystore.properties
           else
             echo "No keystore secret found, generating temporary keystore for CI build..."
             keytool -genkey -v \
@@ -71,12 +69,10 @@ EOF
               -keypass 123456 \
               -dname "CN=LuckyTool CI, OU=LuckyTool, O=LuckyTool, L=Unknown, ST=Unknown, C=CN"
             
-            cat <<EOF > keystore/keystore.properties
-storeFile=../keystore/ci_temp.jks
-storePassword=123456
-keyAlias=luckytool_ci
-keyPassword=123456
-EOF
+            echo "storeFile=../keystore/ci_temp.jks" > keystore/keystore.properties
+            echo "storePassword=123456" >> keystore/keystore.properties
+            echo "keyAlias=luckytool_ci" >> keystore/keystore.properties
+            echo "keyPassword=123456" >> keystore/keystore.properties
           fi
 
       - name: Grant execute permission for gradlew
