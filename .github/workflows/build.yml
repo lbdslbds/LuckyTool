@@ -29,7 +29,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
@@ -117,7 +117,7 @@ jobs:
           done
 
       - name: Upload APK Artifacts
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         with:
           name: LuckyTool-APKs
           path: dist/*.apk
@@ -125,7 +125,7 @@ jobs:
 
       - name: Publish to Tagged Release
         if: startsWith(github.ref, 'refs/tags/v')
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           files: dist/*.apk
           generate_release_notes: true
@@ -134,7 +134,7 @@ jobs:
 
       - name: Publish to Snapshot Release (Direct .apk Download)
         if: "!startsWith(github.ref, 'refs/tags/v') && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')"
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: snapshot
           name: "LuckyTool Latest Build (Snapshot)"
