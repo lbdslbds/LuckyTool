@@ -1,0 +1,115 @@
+name: Build APK
+
+on:
+  push:
+    branches:
+      - main
+      - master
+    tags:
+      - 'v*'
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      build_type:
+        description: 'Build Type'
+        required: true
+        default: 'release'
+        type: choice
+        options:
+          - release
+          - debug
+          - both
+
+jobs:
+  build:
+    name: Build LuckyTool APK
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Setup Keystore & Signing Properties
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          mkdir -p keystore
+          if [ -n "$KEYSTORE_BASE64" ]; then
+            echo "Using keystore from GitHub Secrets..."
+            echo "$KEYSTORE_BASE64" | base64 -d > keystore/release.jks
+            cat <<EOF > keystore/keystore.properties
+storeFile=../keystore/release.jks
+storePassword=$KEYSTORE_PASSWORD
+keyAlias=$KEY_ALIAS
+keyPassword=$KEY_PASSWORD
+EOF
+          else
+            echo "No keystore secret found, generating temporary keystore for CI build..."
+            keytool -genkey -v \
+              -keystore keystore/ci_temp.jks \
+              -alias luckytool_ci \
+              -keyalg RSA \
+              -keysize 2048 \
+              -validity 10000 \
+              -storepass 123456 \
+              -keypass 123456 \
+              -dname "CN=LuckyTool CI, OU=LuckyTool, O=LuckyTool, L=Unknown, ST=Unknown, C=CN"
+            
+            cat <<EOF > keystore/keystore.properties
+storeFile=../keystore/ci_temp.jks
+storePassword=123456
+keyAlias=luckytool_ci
+keyPassword=123456
+EOF
+          fi
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Build with Gradle
+        run: |
+          BUILD_TYPE="${{ inputs.build_type || 'release' }}"
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            echo "Pull request detected, building debug..."
+            ./gradlew assembleDebug --stacktrace
+          elif [ "$BUILD_TYPE" = "debug" ]; then
+            ./gradlew assembleDebug --stacktrace
+          elif [ "$BUILD_TYPE" = "release" ]; then
+            ./gradlew assembleRelease --stacktrace
+          elif [ "$BUILD_TYPE" = "both" ]; then
+            ./gradlew assembleDebug assembleRelease --stacktrace
+          else
+            ./gradlew assembleRelease --stacktrace
+          fi
+
+      - name: Upload APK Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: LuckyTool-APKs
+          path: app/build/outputs/apk/**/*.apk
+          if-no-files-found: error
+
+      - name: Release to GitHub Releases
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: app/build/outputs/apk/release/*.apk
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
