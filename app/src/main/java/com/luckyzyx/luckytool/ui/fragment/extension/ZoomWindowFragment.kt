@@ -12,6 +12,7 @@ import androidx.core.view.MenuProvider
 import androidx.core.widget.addTextChangedListener
 import com.drake.net.utils.scopeLife
 import com.drake.net.utils.withDefault
+import com.google.android.material.materialswitch.MaterialSwitch
 import com.highcapable.betterandroid.ui.component.adapter.factory.bindAdapter
 import com.highcapable.betterandroid.ui.component.adapter.recycler.factory.notifyDataSetChangedIgnore
 import com.luckyzyx.luckytool.R
@@ -95,15 +96,10 @@ class ZoomWindowFragment : BaseFragment<FragmentZoomWindowApplistLayoutBinding>(
         binding.recyclerView.apply {
             adapter = bindAdapter<AppInfo> {
                 onBindData { filterAppInfos }
-                onBindItemView<LayoutAppinfoSwitchItemBinding> { item, info, position ->
+                onBindItemView<LayoutAppinfoSwitchItemBinding> { item, info, _ ->
                     item.appIcon.setImageDrawable(info.icon)
                     item.appName.text = info.name
                     item.packName.text = info.packageName
-
-                    item.root.setOnClickListener(null)
-                    item.root.setOnClickListener {
-                        item.switchview.isChecked = !item.switchview.isChecked
-                    }
 
                     item.switchview.setOnCheckedChangeListener(null)
                     item.switchview.isChecked = allEnabledInfos.contains(info)
@@ -112,6 +108,9 @@ class ZoomWindowFragment : BaseFragment<FragmentZoomWindowApplistLayoutBinding>(
                         if (isChecked) allEnabledInfos.add(info)
                         saveEnableList()
                     }
+                }
+                onItemViewClick { view, _, _ ->
+                    view.findViewById<MaterialSwitch>(R.id.switchview)?.toggle()
                 }
             }
             FastScrollerBuilder(this).useMd2Style().build()
@@ -164,7 +163,7 @@ class ZoomWindowFragment : BaseFragment<FragmentZoomWindowApplistLayoutBinding>(
                     if (isReverse) reverse()
                 }
                 filterAppInfos = allAppInfos
-                filterAppInfos.removeAll(allEnabledInfos)
+                filterAppInfos.removeAll(allEnabledInfos.toSet())
                 filterAppInfos.addAll(0, allEnabledInfos)
             }
 

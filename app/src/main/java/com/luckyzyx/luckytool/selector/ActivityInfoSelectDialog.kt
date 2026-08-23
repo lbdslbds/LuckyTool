@@ -2,16 +2,18 @@ package com.luckyzyx.luckytool.selector
 
 import android.content.Context
 import android.content.pm.ActivityInfo
-import android.view.LayoutInflater
 import androidx.appcompat.app.AlertDialog
 import androidx.core.view.isVisible
 import androidx.core.widget.addTextChangedListener
 import com.drake.net.utils.scope
 import com.drake.net.utils.withDefault
+import com.google.android.material.checkbox.MaterialCheckBox
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputLayout
 import com.highcapable.betterandroid.ui.component.adapter.factory.bindAdapter
 import com.highcapable.betterandroid.ui.component.adapter.recycler.factory.notifyDataSetChangedIgnore
+import com.highcapable.betterandroid.ui.extension.view.layoutInflater
+import com.luckyzyx.luckytool.R
 import com.luckyzyx.luckytool.databinding.DialogActivityInfoSelectorLayoutBinding
 import com.luckyzyx.luckytool.databinding.LayoutActivityinfoCheckboxItemBinding
 import com.luckyzyx.luckytool.databinding.LayoutActivityinfoItemBinding
@@ -28,7 +30,7 @@ class ActivityInfoSelectDialog(
     private val TAG = "ActivityInfoSelectDialog"
 
     private val binding =
-        DialogActivityInfoSelectorLayoutBinding.inflate(LayoutInflater.from(context))
+        DialogActivityInfoSelectorLayoutBinding.inflate(context.layoutInflater)
 
     private lateinit var dialog: AlertDialog
 
@@ -77,33 +79,22 @@ class ActivityInfoSelectDialog(
             adapter = bindAdapter<ActivityInfo> {
                 onBindData { filterActivityInfos }
                 if (!multiMode) {
-                    onBindItemView<LayoutActivityinfoItemBinding> { item, info, position ->
+                    onBindItemView<LayoutActivityinfoItemBinding> { item, info, _ ->
                         val appIcon = info.loadIcon(context.packageManager)
 
                         item.activityIcon.setImageDrawable(appIcon)
                         item.activityLabel.text = info.loadLabel(context.packageManager)
                         item.activityName.text = info.name
-
-                        item.activityInfoView.setOnClickListener(null)
-                        item.activityInfoView.setOnClickListener {
-                            dialog.dismiss()
-                            onSelectActivityInfoListener?.resultSelectActivityInfos(arrayListOf(info))
-                        }
                     }
                 } else {
-                    onBindItemView<LayoutActivityinfoCheckboxItemBinding> { item, info, position ->
+                    onBindItemView<LayoutActivityinfoCheckboxItemBinding> { item, info, _ ->
                         val appIcon = info.loadIcon(context.packageManager)
 
                         item.activityIcon.setImageDrawable(appIcon)
                         item.activityLabel.text = info.loadLabel(context.packageManager)
                         item.activityName.text = info.name
 
-                        item.activityInfoView.setOnClickListener(null)
                         item.checkboxView.setOnCheckedChangeListener(null)
-
-                        item.activityInfoView.setOnClickListener {
-                            item.checkboxView.isChecked = !item.checkboxView.isChecked
-                        }
                         item.checkboxView.isChecked = allEnabledInfos.contains(info)
                         item.checkboxView.setOnCheckedChangeListener { _, isChecked ->
                             allEnabledInfos.remove(info)
@@ -111,12 +102,20 @@ class ActivityInfoSelectDialog(
                         }
                     }
                 }
+                onItemViewClick { view, info, _ ->
+                    if (multiMode) {
+                        view.findViewById<MaterialCheckBox>(R.id.checkbox_view)?.toggle()
+                    } else {
+                        dialog.dismiss()
+                        onSelectActivityInfoListener?.resultSelectActivityInfos(arrayListOf(info))
+                    }
+                }
             }
             FastScrollerBuilder(this).useMd2Style().build()
         }
     }
 
-    override fun show(): AlertDialog? {
+    override fun show(): AlertDialog {
         if (allActivityInfos.isEmpty()) loadData()
         dialog = super.show()
         return dialog
@@ -158,7 +157,7 @@ class ActivityInfoSelectDialog(
                 allActivityInfos.forEach {
                     if (enabledList.contains(it.packageName)) allEnabledInfos.add(it)
                 }
-                allActivityInfos.removeAll(allEnabledInfos)
+                allActivityInfos.removeAll(allEnabledInfos.toSet())
                 allActivityInfos.addAll(0, allEnabledInfos)
                 filterActivityInfos = allActivityInfos
             }
