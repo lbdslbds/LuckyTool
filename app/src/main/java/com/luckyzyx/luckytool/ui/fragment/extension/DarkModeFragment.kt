@@ -16,6 +16,7 @@ import androidx.core.view.isVisible
 import androidx.core.widget.addTextChangedListener
 import com.drake.net.utils.scopeLife
 import com.drake.net.utils.withDefault
+import com.google.android.material.materialswitch.MaterialSwitch
 import com.highcapable.betterandroid.ui.component.adapter.factory.bindAdapter
 import com.highcapable.betterandroid.ui.component.adapter.recycler.factory.notifyDataSetChangedIgnore
 import com.luckyzyx.luckytool.R
@@ -122,17 +123,12 @@ class DarkModeFragment : BaseFragment<FragmentDarkModeApplistLayoutBinding>(), M
         binding.recyclerView.apply {
             adapter = bindAdapter<AppInfo> {
                 onBindData { filterAppInfos }
-                onBindItemView<LayoutAppinfoSwitchItemDarkmodeBinding> { item, appInfo, position ->
+                onBindItemView<LayoutAppinfoSwitchItemDarkmodeBinding> { item, appInfo, _ ->
                     item.appIcon.setImageDrawable(appInfo.icon)
                     item.appName.text = appInfo.name
                     item.packName.text = appInfo.packageName
 
                     val data = allEnabledInfos.get(appInfo.packageName)
-
-                    item.root.setOnClickListener(null)
-                    item.root.setOnClickListener {
-                        item.switchview.isChecked = !item.switchview.isChecked
-                    }
 
                     item.switchview.setOnCheckedChangeListener(null)
                     item.switchview.isChecked = data != null
@@ -149,11 +145,14 @@ class DarkModeFragment : BaseFragment<FragmentDarkModeApplistLayoutBinding>(), M
                     item.sliderLayout.isVisible = data != null
                     item.slider.clearOnChangeListeners()
                     item.slider.value = data?.curType?.toFloat() ?: 0F
-                    item.slider.addOnChangeListener { slider, value, fromUser ->
+                    item.slider.addOnChangeListener { _, value, fromUser ->
                         if (!fromUser) return@addOnChangeListener
                         allEnabledInfos[appInfo.packageName]?.curType = value.toInt()
                         saveEnableList(allEnabledInfos)
                     }
+                }
+                onItemViewClick { view, _, _ ->
+                    view.findViewById<MaterialSwitch>(R.id.switchview)?.toggle()
                 }
             }
             FastScrollerBuilder(this).useMd2Style().build()
@@ -199,7 +198,7 @@ class DarkModeFragment : BaseFragment<FragmentDarkModeApplistLayoutBinding>(), M
                 }
 
                 val sortDatas = ArrayList<AppInfo>()
-                allEnabledInfos.forEach { k, v ->
+                allEnabledInfos.forEach { (k, _) ->
                     val find = allAppInfos.find { it.packageName == k } ?: return@forEach
                     sortDatas.add(find)
                 }
@@ -215,7 +214,7 @@ class DarkModeFragment : BaseFragment<FragmentDarkModeApplistLayoutBinding>(), M
                     if (isReverse) reverse()
                 }
                 filterAppInfos = allAppInfos
-                filterAppInfos.removeAll(sortDatas)
+                filterAppInfos.removeAll(sortDatas.toSet())
                 filterAppInfos.addAll(0, sortDatas)
             }
 

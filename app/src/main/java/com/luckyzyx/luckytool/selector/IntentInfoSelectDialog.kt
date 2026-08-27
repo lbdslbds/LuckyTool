@@ -3,16 +3,17 @@ package com.luckyzyx.luckytool.selector
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.ResolveInfo
-import android.view.LayoutInflater
 import androidx.appcompat.app.AlertDialog
 import androidx.core.view.isVisible
 import androidx.core.widget.addTextChangedListener
 import com.drake.net.utils.scope
 import com.drake.net.utils.withDefault
+import com.google.android.material.checkbox.MaterialCheckBox
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputLayout
 import com.highcapable.betterandroid.ui.component.adapter.factory.bindAdapter
 import com.highcapable.betterandroid.ui.component.adapter.recycler.factory.notifyDataSetChangedIgnore
+import com.highcapable.betterandroid.ui.extension.view.layoutInflater
 import com.luckyzyx.luckytool.R
 import com.luckyzyx.luckytool.data.AppIntentInfo
 import com.luckyzyx.luckytool.databinding.DialogActivityInfoSelectorLayoutBinding
@@ -35,7 +36,7 @@ class IntentInfoSelectDialog(
     private val TAG = "IntentInfoSelectDialog"
 
     private val binding =
-        DialogActivityInfoSelectorLayoutBinding.inflate(LayoutInflater.from(context))
+        DialogActivityInfoSelectorLayoutBinding.inflate(context.layoutInflater)
 
     private lateinit var dialog: AlertDialog
 
@@ -85,7 +86,7 @@ class IntentInfoSelectDialog(
             adapter = bindAdapter<AppIntentInfo> {
                 onBindData { filterIntentInfos }
                 if (!multiMode) {
-                    onBindItemView<LayoutActivityinfoItemBinding> { item, info, position ->
+                    onBindItemView<LayoutActivityinfoItemBinding> { item, info, _ ->
                         item.activityIcon.isVisible = showAppIcon
 
                         val resolveInfo = appResolveInfos[info]!!
@@ -97,15 +98,9 @@ class IntentInfoSelectDialog(
                         item.activityIcon.setImageDrawable(appIcon)
                         item.activityLabel.text = "$label $type"
                         item.activityName.text = name
-                        item.activityInfoView.setOnClickListener(null)
-
-                        item.activityInfoView.setOnClickListener {
-                            dialog.dismiss()
-                            onSelectIntentInfoListener?.resultSelectIntentInfos(arrayListOf(info))
-                        }
                     }
                 } else {
-                    onBindItemView<LayoutActivityinfoCheckboxItemBinding> { item, info, position ->
+                    onBindItemView<LayoutActivityinfoCheckboxItemBinding> { item, info, _ ->
                         item.activityIcon.isVisible = showAppIcon
 
                         val resolveInfo = appResolveInfos[info]!!
@@ -117,17 +112,21 @@ class IntentInfoSelectDialog(
                         item.activityIcon.setImageDrawable(appIcon)
                         item.activityLabel.text = "$label ${formatType(type)}"
                         item.activityName.text = name
-                        item.activityInfoView.setOnClickListener(null)
-                        item.checkboxView.setOnCheckedChangeListener(null)
 
+                        item.checkboxView.setOnCheckedChangeListener(null)
                         item.checkboxView.isChecked = allEnabledInfos.contains(info)
-                        item.activityInfoView.setOnClickListener {
-                            item.checkboxView.performClick()
-                        }
                         item.checkboxView.setOnCheckedChangeListener { _, isChecked ->
                             allEnabledInfos.remove(info)
                             if (isChecked) allEnabledInfos.add(info)
                         }
+                    }
+                }
+                onItemViewClick { view, info, _ ->
+                    if (multiMode) {
+                        view.findViewById<MaterialCheckBox>(R.id.checkbox_view)?.toggle()
+                    } else {
+                        dialog.dismiss()
+                        onSelectIntentInfoListener?.resultSelectIntentInfos(arrayListOf(info))
                     }
                 }
             }
@@ -135,7 +134,7 @@ class IntentInfoSelectDialog(
         }
     }
 
-    override fun show(): AlertDialog? {
+    override fun show(): AlertDialog {
         if (allIntentInfos.isEmpty()) loadData()
         dialog = super.show()
         return dialog
@@ -184,7 +183,7 @@ class IntentInfoSelectDialog(
                         allEnabledInfos.add(it)
                     }
                 }
-                allIntentInfos.removeAll(allEnabledInfos)
+                allIntentInfos.removeAll(allEnabledInfos.toSet())
                 allIntentInfos.addAll(0, allEnabledInfos)
                 filterIntentInfos = allIntentInfos
             }

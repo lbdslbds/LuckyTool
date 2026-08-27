@@ -1,17 +1,18 @@
 package com.luckyzyx.luckytool.selector
 
 import android.content.Context
-import android.view.LayoutInflater
 import androidx.appcompat.app.AlertDialog
 import androidx.core.view.isVisible
 import androidx.core.widget.addTextChangedListener
 import com.drake.net.utils.scope
 import com.drake.net.utils.withDefault
+import com.google.android.material.checkbox.MaterialCheckBox
 import com.google.android.material.chip.Chip
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputLayout
 import com.highcapable.betterandroid.ui.component.adapter.factory.bindAdapter
 import com.highcapable.betterandroid.ui.component.adapter.recycler.factory.notifyDataSetChangedIgnore
+import com.highcapable.betterandroid.ui.extension.view.layoutInflater
 import com.luckyzyx.luckytool.R
 import com.luckyzyx.luckytool.data.AppInfo
 import com.luckyzyx.luckytool.databinding.DialogAppInfoSelectorLayoutBinding
@@ -35,9 +36,9 @@ class AppInfoSelectDialog(context: Context, val multiMode: Boolean = false) :
 
     private val TAG = "AppInfoSelectDialog"
 
-    private val binding = DialogAppInfoSelectorLayoutBinding.inflate(LayoutInflater.from(context))
+    private val binding = DialogAppInfoSelectorLayoutBinding.inflate(context.layoutInflater)
 
-    private var dialog: AlertDialog? = null
+    private lateinit var dialog: AlertDialog
 
     private var allAppInfos = ArrayList<AppInfo>()
     private var filterAppInfos = ArrayList<AppInfo>()
@@ -79,6 +80,7 @@ class AppInfoSelectDialog(context: Context, val multiMode: Boolean = false) :
         binding.btnOk.apply {
             isVisible = multiMode
             setOnClickListener {
+                dialog?.dismiss()
                 onSelectAppInfoListener?.resultSelectAppInfos(allEnabledInfos)
             }
         }
@@ -87,34 +89,31 @@ class AppInfoSelectDialog(context: Context, val multiMode: Boolean = false) :
             adapter = bindAdapter<AppInfo> {
                 onBindData { filterAppInfos }
                 if (!multiMode) {
-                    onBindItemView<LayoutAppinfoItemBinding> { item, info, position ->
+                    onBindItemView<LayoutAppinfoItemBinding> { item, info, _ ->
                         item.appIcon.setImageDrawable(info.icon)
                         item.appName.text = info.name
                         item.packName.text = info.packageName
-
-                        item.root.setOnClickListener(null)
-                        item.root.setOnClickListener {
-                            dialog?.dismiss()
-                            onSelectAppInfoListener?.resultSelectAppInfos(arrayListOf(info))
-                        }
                     }
                 } else {
-                    onBindItemView<LayoutAppinfoCheckboxItemBinding> { item, info, position ->
+                    onBindItemView<LayoutAppinfoCheckboxItemBinding> { item, info, _ ->
                         item.appIcon.setImageDrawable(info.icon)
                         item.appName.text = info.name
                         item.packName.text = info.packageName
 
-                        item.root.setOnClickListener(null)
                         item.checkboxView.setOnCheckedChangeListener(null)
-
                         item.checkboxView.isChecked = allEnabledInfos.contains(info)
-                        item.root.setOnClickListener {
-                            item.checkboxView.isChecked = !item.checkboxView.isChecked
-                        }
                         item.checkboxView.setOnCheckedChangeListener { _, isChecked ->
                             allEnabledInfos.remove(info)
                             if (isChecked) allEnabledInfos.add(info)
                         }
+                    }
+                }
+                onItemViewClick { view, info, _ ->
+                    if (multiMode) {
+                        view.findViewById<MaterialCheckBox>(R.id.checkbox_view)?.toggle()
+                    } else {
+                        dialog?.dismiss()
+                        onSelectAppInfoListener?.resultSelectAppInfos(arrayListOf(info))
                     }
                 }
             }
@@ -122,7 +121,7 @@ class AppInfoSelectDialog(context: Context, val multiMode: Boolean = false) :
         }
     }
 
-    override fun show(): AlertDialog? {
+    override fun show(): AlertDialog {
         if (allAppInfos.isEmpty()) loadData()
         dialog = super.show()
         return dialog
@@ -243,7 +242,7 @@ class AppInfoSelectDialog(context: Context, val multiMode: Boolean = false) :
                     }
                     if (isReverse) reverse()
                 }
-                allAppInfos.removeAll(allEnabledInfos)
+                allAppInfos.removeAll(allEnabledInfos.toSet())
                 allAppInfos.addAll(0, allEnabledInfos)
                 filterAppInfos = allAppInfos
             }
