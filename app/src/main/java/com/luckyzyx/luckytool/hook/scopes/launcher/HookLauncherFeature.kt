@@ -19,17 +19,54 @@ object HookLauncherFeature : YukiBaseHooker() {
         override fun onHook() {
             val disableAutoSwitch =
                 prefs(ModulePrefs).getBoolean("disable_auto_switch_last_task", false)
+            if (!disableAutoSwitch) return
 
-            //Source AppFeatureUtils
+            //Source AppFeatureUtils (all versions)
+            //Legacy gate, new Launcher still consults it in StackPagedViewEx,
+            //getToRecentsFocusPage, AppToOverviewAnimationProvider and
+            //StandardInterruptHelper.canFocusToNextPage
             "com.android.common.util.AppFeatureUtils".toClass().resolve().apply {
                 //Source OplusGridRecentsConfig isEnable
-                (firstMethodOrNull {
+                firstMethodOrNull {
                     name = "isSupportAutoFocusToNextPageInOverviewState"
-                    parameters(Boolean::class)
-                } ?: firstMethod { name = "isSupportAutoFocusToNextPageInOverviewState" }).hook {
-                    if (disableAutoSwitch) replaceToFalse()
+                    parameterCount = 1
+                }?.hook {
+                    replaceToFalse()
+                }
+                firstMethod {
+                    name = "isSupportAutoFocusToNextPageInOverviewState"
+                    emptyParameters()
+                }.hook {
+                    replaceToFalse()
                 }
             }
+
+            //Source RecentInterruptAnimUtilKt (new Launcher only)
+            //computeNonInterruptFocusToNextPageTarget dropped the gate and returns
+            //runningTaskIndex + 1, which StackRecentsViewDelegate.updateStackLayoutNextPage
+            //uses to overwrite the hooked value; -1 falls back to getNextPage()
+            "com.oplus.quickstep.utils.RecentInterruptAnimUtilKt".toClassOrNull()?.resolve()
+                ?.apply {
+                    firstMethodOrNull {
+                        name = "computeNonInterruptFocusToNextPageTarget"
+                        parameterCount = 1
+                    }?.hook {
+                        replaceTo(-1)
+                    }
+                }
+
+            //Source TileCardFirstInterruptFocusPolicy (new Launcher only, card-first path)
+            //resolveFocusPageFallback decides the card-first settle page without the gate;
+            //-1 falls back to getNextPage()
+            "com.oplus.quickstep.utils.tilecardfirst.policy.TileCardFirstInterruptFocusPolicy"
+                .toClassOrNull()?.resolve()?.apply {
+                    firstMethodOrNull {
+                        name = "resolveFocusPageFallback"
+                        parameterCount = 2
+                    }?.hook {
+                        replaceTo(-1)
+                    }
+                }
         }
     }
 
