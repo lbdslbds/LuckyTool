@@ -19,6 +19,7 @@ import androidx.core.view.isVisible
 import androidx.core.view.setPadding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textview.MaterialTextView
+import com.highcapable.betterandroid.ui.extension.view.textColor
 import com.highcapable.yukihookapi.YukiHookAPI
 import com.luckyzyx.luckytool.BuildConfig
 import com.luckyzyx.luckytool.IGlobalFuncController
@@ -137,7 +138,7 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(), MenuProvider {
                 isVisible = true
                 textSize = 16F
                 text = context.getString(R.string.authorized)
-                setTextColor(Color.RED)
+                textColor = Color.RED
             }
             setOnClickListener {
                 val url = "https://luckyzyx.github.io/LuckyTool_Doc/use/download_link"
@@ -152,6 +153,7 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(), MenuProvider {
 
     private fun initSystemInfoView() {
         GlobalFuncService.get(activity) {
+            if (view == null) return@get
             val deviceInfo = activity?.getDeviceInfo(it)
             if (deviceInfo.isNullOrBlank()) return@get
             binding.systemInfoLoading.isVisible = false

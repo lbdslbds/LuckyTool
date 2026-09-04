@@ -26,6 +26,7 @@ import androidx.navigation.fragment.findNavController
 import com.drake.net.utils.scopeLife
 import com.drake.net.utils.withDefault
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.highcapable.kavaref.extension.classOf
 import com.luckyzyx.luckytool.IAdbDebugController
 import com.luckyzyx.luckytool.R
 import com.luckyzyx.luckytool.data.AppInfo
@@ -144,7 +145,7 @@ class OtherFragment : BaseFragment<FragmentOtherBinding>(), MenuProvider {
                     context.packageName, PackageManager.GET_SERVICES
                 ) ?: return@setOnClickListener
                 val statusBarManager: StatusBarManager =
-                    context.getSystemService(StatusBarManager::class.java)
+                    context.getSystemService(classOf<StatusBarManager>())
                 val tileInfos = info.services?.filter {
                     it.permission == "android.permission.BIND_QUICK_SETTINGS_TILE"
                 }?.toList() ?: arrayListOf()
@@ -183,6 +184,7 @@ class OtherFragment : BaseFragment<FragmentOtherBinding>(), MenuProvider {
     private fun initTouchPanelView() {
         val touchs = arrayOf("120", "180", "240", "360", "480", "600", "720")
         TilesService.get(activity) { controller ->
+            if (view == null) return@get
             binding.touchPanel.apply {
                 isVisible = controller != null && controller.checkTouchMode()
                 setOnClickListener {
