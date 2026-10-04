@@ -462,6 +462,8 @@
     
     <string name="LockScreenStatusBar">Lock Screen StatusBar</string>
     <string name="hide_lock_screen_status_bar_display">Hide lock screen statusbar display</string>
+    <string name="hide_panoramic_aod_status_bar">Hide panoramic aod status bar</string>
+    <string name="hide_panoramic_aod_status_bar_summary">Hide the status bar only during panoramic always-on display. Restart System UI to apply.</string>
     <string name="remove_statusbar_carriers">Remove statusbar carriers</string>
     <string name="statusbar_custom_carrier_display_text">Custom statusbar carrier display text</string>
     <string name="statusbar_carriers_use_user_typeface">StatusBar Carriers use user fonts</string>

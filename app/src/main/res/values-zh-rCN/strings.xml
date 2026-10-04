@@ -406,6 +406,8 @@
     <string name="set_full_screen_charging_animation_mode">全屏充电动画模式</string>
     <string name="LockScreenStatusBar">锁屏状态栏</string>
     <string name="hide_lock_screen_status_bar_display">隐藏锁屏状态栏显示</string>
+    <string name="hide_panoramic_aod_status_bar">隐藏全景息屏状态栏</string>
+    <string name="hide_panoramic_aod_status_bar_summary">仅在全景息屏显示期间隐藏状态栏，亮屏锁屏不受影响。重启系统界面后生效。</string>
     <string name="remove_statusbar_carriers">移除状态栏运营商</string>
     <string name="statusbar_custom_carrier_display_text">自定义运营商显示文本</string>
     <string name="statusbar_carriers_use_user_typeface">状态栏运营商使用用户字体</string>

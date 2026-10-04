@@ -1,11 +1,11 @@
 [versions]
-agp = "9.3.2"
-kotlin = "2.4.10"
+agp = "9.4.1"
+kotlin = "2.4.20"
 ksp = "2.3.9"
 
 kavaref = "1.1.0"
 betterandroid = "1.1.6"
-navigation = "2.10.0"
+navigation = "2.10.1"
 kotlinx-coroutines = "1.11.0"
 kotlinx-serialization = "1.11.0"
 libsu = "6.0.0"

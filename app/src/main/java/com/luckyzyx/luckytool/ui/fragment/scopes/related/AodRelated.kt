@@ -97,6 +97,14 @@ class AodRelated : BaseScopePreferenceFeagment() {
                 isVisible = osCode in 26..33
                 isIconSpaceReserved = false
             })
+            add(SwitchPreference(this@loadPreferences).apply {
+                title = getString(R.string.hide_panoramic_aod_status_bar)
+                summary = getString(R.string.hide_panoramic_aod_status_bar_summary)
+                key = "hide_panoramic_aod_status_bar"
+                setDefaultValue(false)
+                isVisible = osCode >= 37
+                isIconSpaceReserved = false
+            })
             //随机一言
             if (osCode >= 26) {
                 add(PreferenceCategory(this@loadPreferences).apply {

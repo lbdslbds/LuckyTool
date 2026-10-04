@@ -42,6 +42,18 @@ val A14 get() = Build.VERSION_CODES.UPSIDE_DOWN_CAKE
 val A15 get() = Build.VERSION_CODES.VANILLA_ICE_CREAM
 
 /**
+ * Android 16 36 BAKLAVA
+ * @see [Build.VERSION_CODES.BAKLAVA]
+ * */
+val A16 get() = Build.VERSION_CODES.BAKLAVA
+
+/**
+ * Android 17 37 CINNAMON_BUN
+ * @see [Build.VERSION_CODES.CINNAMON_BUN]
+ * */
+val A17 get() = Build.VERSION_CODES.CINNAMON_BUN
+
+/**
  * 获取构建版本名/版本号
  * @return [String]
  */
